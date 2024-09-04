@@ -1,0 +1,167 @@
+Sub ScrapeNestedTable()
+
+    Dim ws As Worksheet
+    Dim URL As String
+    Dim query As QueryTable
+    
+    
+    
+    
+    ' Replace with the actual website URL
+    URL = "http://iportal.infocastfn.com/taitak_portal/IpoExpress/IpoLockUp.asp?LangId=20"
+    
+    
+    Set ws = Worksheets("LockupStockList")
+    
+    ws.Columns("A:Z").Delete
+
+    ' Create a new QueryTable object
+    Set query = ws.QueryTables.Add(Connection:="URL;" & URL, Destination:=ws.Range("A1"))
+
+    ' Define the nested table reference
+    With query
+        .WebTables = "#tables(2).tables(1)"
+        .WebSelectionType = xlAllTables
+    End With
+
+    ' Refresh the query to import the data
+    query.Refresh BackgroundQuery:=False
+
+End Sub
+
+
+Sub ClearFormatLookUp()
+    Dim rng As Range
+    
+    Set ws = Worksheets("LockupStockList")
+    
+    
+    Set rng = ws.Range("A1:Z100")
+    rng.Interior.ColorIndex = 0
+    rng.Hyperlinks.Delete
+    
+    ws.Rows("1:4").Delete
+    
+
+End Sub
+
+
+Sub ScrapeTable()
+
+    Dim lookupWs As Worksheet
+    Dim URL As String
+    Dim query As QueryTable
+    Dim http As Object
+    Dim yyyymmdd As Long
+    
+    Set lookupWs = Worksheets("ShortSellingListHKEX")
+    
+    yyyymmdd = Format(Date, "yyyymmdd")
+    
+    Set http = CreateObject("MSXML2.XMLHTTP")
+    
+    lookupWs.Columns("A:Z").Delete
+    
+    Do While True
+    
+    
+
+    ' Replace with the actual website URL
+        URL = _
+            "https://www.hkex.com.hk/chi/market/sec_tradinfo/ds" & _
+            yyyymmdd & _
+            "_c.htm"
+    
+
+    ' Set the URL of the website
+        http.Open "GET", URL, False
+
+    ' Send the request
+        http.send
+
+    ' Check if the request was successful
+        If http.Status = 200 Then
+    ' Create a new QueryTable object
+            Set query = lookupWs.QueryTables.Add(Connection:="URL;" & URL, Destination:=lookupWs.Range("A1"))
+
+    ' Define the nested table reference
+            With query
+                .WebTables = "1"
+                .WebSelectionType = xlAllTables
+                .RefreshStyle = xlInsertEntireRows
+            End With
+    ' Refresh the query to import the data
+            query.Refresh BackgroundQuery:=False
+            
+            Exit Do 'No exit while anymore
+        
+        Else
+        ' Handle the error: 404 Not Found
+            yyyymmdd = yyyymmdd - 1
+            
+        
+        End If
+        
+    Loop
+    
+    ' Clean up objects
+    Set http = Nothing
+    Set query = Nothing
+    
+End Sub
+
+
+Sub checking()
+    Dim cell As Range
+    Dim ws As Worksheet
+    Dim i As Integer
+    
+    Set ws = Worksheets("LockupStockList")
+    Set lookupWs = Worksheets("ShortSellingListHKEX")
+    Set mainWs = Worksheets("main")
+    
+    Rows("3:50").Delete
+    
+    For Each cell In ws.Range("A1:A11")
+        If IsNumeric(cell.Value) And Len(cell.Value) >= 1 And Len(cell.Value) <= 4 Then
+            Set foundCell = lookupWs.Columns("B").Find(What:=cell.Value, LookIn:=xlValues, LookAt:=xlWhole)
+                
+                If Not foundCell Is Nothing Then
+                    
+                    i = 1
+                    'If stock is found in short list
+                    ' Copy the entire row of the found cell to the new worksheet
+                    Set copyRow = cell.EntireRow
+                    
+                    Do While True
+                        If mainWs.Range("A" & i).Value = "" Then
+                            copyRow.Copy Destination:=mainWs.Cells(i, 1)
+                            Exit Do
+                        Else
+                            i = i + 1
+                        End If
+                    Loop
+                End If
+        
+        'Else for testing
+            'MsgBox "No: " & cell.Value & " is not a valid number length"
+        
+        End If
+    Next cell
+End Sub
+
+Sub main()
+
+    Call ScrapeNestedTable
+    
+    Call ScrapeTable
+    
+    Call ClearFormatLookUp
+    
+    Call checking
+    
+    Set mainWs = Worksheets("main")
+    
+    mainWs.Cells(1, 2).Value = Format(Date, "dd.mm.yyyy")
+    
+End Sub
