@@ -1,6 +1,8 @@
-VBA excel 表_ 更新及展列"禁售期"將到之"可沽空的港股"
+<h1>VBA excel 表_ 更新及展列"禁售期"將到之"可沽空的港股"</h1>
 
-下載附件EXCEL表  按worksheet "main"的 UPDATE BUTTON, 即可更新
+    下載附件EXCEL表"short_stock_IPO_lockup.xlsm"  
+
+    按worksheet "main"的 UPDATE BUTTON, 即可更新
 
 此VBA主要以QueryTable 抓取 
   1. HKEX可進行賣空的指定證券名單
