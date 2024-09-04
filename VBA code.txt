@@ -120,9 +120,9 @@ Sub checking()
     Set lookupWs = Worksheets("ShortSellingListHKEX")
     Set mainWs = Worksheets("main")
     
-    Rows("3:50").Delete
+    mainWs.Rows("3:100").Delete
     
-    For Each cell In ws.Range("A1:A11")
+    For Each cell In ws.Range("A1:A200")
         If IsNumeric(cell.Value) And Len(cell.Value) >= 1 And Len(cell.Value) <= 4 Then
             Set foundCell = lookupWs.Columns("B").Find(What:=cell.Value, LookIn:=xlValues, LookAt:=xlWhole)
                 
