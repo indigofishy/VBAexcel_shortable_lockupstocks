@@ -16,3 +16,10 @@
 
 
 最後抽取"禁售期"將到之"可沽空的港股"
+
+
+> [!TIP]
+Sample:
+> 
+> 
+![image](https://github.com/user-attachments/assets/e31d01c0-51df-4fb5-8964-dbb8756443b4)
